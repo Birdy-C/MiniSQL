@@ -16,20 +16,22 @@
 
 #include"MiniSQL.h"
 
-#include "Buffer_Manager.h"
+
 
 /*
 	DB_Name为数据库名称。函数实现从现已分配的内存单元中获取用于替换的内存块。
 	首先判断垃圾链表blockHandle中是否有可用的内存块，如果有从链表的头取一块返回。
 	如没有可用块，使用LRU算法找到没有使用的时间最长的块（itime最大），从其现在位置取出，itime置零；并将该块返回。
 */
-blockInfo *findBlock（CString DB_Name）;
+blockInfo *findBlock(CString DB_Name);
 /*
 	实现把指针m_blockInfo 所指向的块连到文件头指针m_fileInfo所指向的块链表的结尾，同时将m_blockInfo所指向
 	的块的file指针指向m_fileInfo。
 */
 void replace(fileInfo * m_fileInfo, blockInfo * m_blockInfo);
-	/*根据文件名，文件类型查找该文件是否在内存，
+
+/*
+	根据文件名，文件类型查找该文件是否在内存，
 	如果是，根据文件的块号，从内存中查询该块，
 	如该块已经在内存，返回该块的指针，
 	如果该块没有在内存，判断垃圾链表中是否有空余的块，
@@ -38,8 +40,9 @@ void replace(fileInfo * m_fileInfo, blockInfo * m_blockInfo);
 	如果没有，为其分配新分配一块，并链接到对应的文件头所指的链表的结尾；
 	如果已达到，使用LRU算法，找到一个替换块，按照给定的要求进行初始化，并将其链接到指定文件块链表的结尾。
 	如果文件没有在内存，调用get_file_info(CString DB_Name,CString fileName, int m_fileType)来为文件分配一个头指针。然后从blockHandle或新分配或使用LRU算法找到一个替换块（方法与上面类似），将该块按要求初始化。
-	*/
-blockInfo *get_file_block(CString DB_Name, CString Table_Name, int fileType, int blockNum);
+*/
+
+blockInfo *get_file_block( CString DB_Name, CString Table_Name, int fileType, int blockNum);
 
 /*
 	调用closeFile(DB_Name,filename,fileType,m_flag),逐个关闭文件。

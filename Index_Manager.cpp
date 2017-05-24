@@ -7,7 +7,7 @@
 ///----------------------------------------------------///
 ///////////////////////////////////////////////////////////
 #include "Index_Manager.h"
-
+#include "Buffer_Manager.h"
 /*
 //1．查找一个值等于inform.value(inform为info结构体)的记录在table表中的记录号：
 
@@ -30,7 +30,7 @@ fileInfo* get_file_info(CString DB_Name,CString fileName, int m_fileType)
 */
 int search_one(CString database, CString table_name, struct index_info &inform) 
 {
-	//get_file_info(database, CString fileName, int m_fileType)
+	get_file_info(database, CString fileName, int m_fileType);
 
 
 
