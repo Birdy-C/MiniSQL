@@ -12,15 +12,7 @@
 #define ATTR_INFO_LENGTH 20
 #define FILE_HEAD_LENGTH 31
 
-//定义表的索引节点信息
-struct index_info
-{
-	CString index_name;
-	int length;
-	char type;
-	long offset;
-	CString value;
-};
+
 
 //定义delete 语句的条件信息
 struct condition_info
@@ -45,17 +37,7 @@ struct attr_info
 	int length;
 	char type;
 };
-struct fileInfo
-{
-	int type;					// 0-> data file
-								// 1 -> index file
-	CString fileName;			// the name of the file
-	int recordAmount;			// the number of record in the file
-	int freeNum;                // the free block number which could be used for the file
-	int recordLength;			// the length of the record in the file
-	fileInfo *next;				// the pointer points to the next file
-	blockInfo *firstBlock;		// point to the first block within the file
-};
+
 
 // 所读取块的信息
 struct blockInfo
@@ -69,6 +51,18 @@ struct blockInfo
 	char *cBlock;				// the array space for storing the records in the block in buffer
 	int iTime;					// it indicate the age of the block in use 
 	int lock;					// prevent the block from replacing
+};
+
+struct fileInfo
+{
+	int type;					// 0-> data file
+								// 1 -> index file
+	CString fileName;			// the name of the file
+	int recordAmount;			// the number of record in the file
+	int freeNum;                // the free block number which could be used for the file
+	int recordLength;			// the length of the record in the file
+	fileInfo *next;				// the pointer points to the next file
+	blockInfo *firstBlock;		// point to the first block within the file
 };
 
 //定义表的索引节点信息

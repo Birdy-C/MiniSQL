@@ -1,1 +1,73 @@
-﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.Cpp.Platform.targets(57,5): error MSB8020: The build tools for v120 (Platform Toolset = 'v120') cannot be found. To build using the v120 build tools, please install v120 build tools.  Alternatively, you may upgrade to the current Visual Studio tools by selecting the Project menu or right-click the solution, and then selecting "Retarget solution".
+﻿  Record_Manager.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+Record_Manager.cpp(3): fatal error C1083: 无法打开包括文件: “Record_Manager.h”: No such file or directory
+  MiniSQL.cpp
+MiniSQL.cpp : fatal error C1041: 无法打开程序数据库“D:\浙大- -\DB\MiniSQL共享资料\MiniSQL_samples\MiniSQL程序\Code\Debug\vc140.idb”；如果要将多个 CL.EXE 写入同一个 .PDB 文件，请使用 /FS
+  Interpreter.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+Interpreter.cpp(554): error C3873: “0x2026”: 不允许将此字符作为标识符的第一个字符
+Interpreter.cpp(556): error C2065: “…”: 未声明的标识符
+Interpreter.cpp(556): error C2143: 语法错误: 缺少“;”(在“return”的前面)
+Interpreter.cpp(576): error C3873: “0x2026”: 不允许将此字符作为标识符的第一个字符
+Interpreter.cpp(578): error C3873: “0x3002”: 不允许将此字符作为标识符的第一个字符
+Interpreter.cpp(578): error C3872: “0x3002”: 此字符不允许在标识符中使用
+Interpreter.cpp(578): error C2065: “…”: 未声明的标识符
+Interpreter.cpp(578): error C2146: 语法错误: 缺少“;”(在标识符“这里删去了几十个函数！！！”的前面)
+Interpreter.cpp(581): error C2065: “这里删去了几十个函数！！！”: 未声明的标识符
+Interpreter.cpp(581): error C2146: 语法错误: 缺少“;”(在标识符“。。。”的前面)
+Interpreter.cpp(581): error C2065: “。。。”: 未声明的标识符
+Interpreter.cpp(581): error C2146: 语法错误: 缺少“;”(在标识符“CString”的前面)
+Interpreter.cpp(582): error C2601: “Interpreter”: 本地函数定义是非法的
+  Interpreter.cpp(562): note: 此行有一个“{”没有匹配项
+Interpreter.cpp(562): fatal error C1075: 左侧的 大括号“{” 与文件结尾不匹配
+  Index_Manager.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+Index_Manager.cpp(187): error C2374: “temp”: 重定义；多次初始化
+  Index_Manager.cpp(180): note: 参见“temp”的声明
+Index_Manager.cpp(182): error C2360: “temp”的初始化操作由“case”标签跳过
+  Index_Manager.cpp(180): note: 参见“temp”的声明
+Index_Manager.cpp(186): error C2360: “temp”的初始化操作由“case”标签跳过
+  Index_Manager.cpp(180): note: 参见“temp”的声明
+Index_Manager.cpp(189): error C2360: “temp”的初始化操作由“case”标签跳过
+  Index_Manager.cpp(187): note: 参见“temp”的声明
+Index_Manager.cpp(193): error C2361: “default”标签跳过“temp”的初始化操作
+  Index_Manager.cpp(187): note: 参见“temp”的声明
+Index_Manager.cpp(242): warning C4552: “>>”: 运算符不起任何作用；应输入带副作用的运算符
+  Catalog_Manager.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+  Buffer_Manager.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+  API_Module.cpp
+D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(38): warning C4996: 'MBCS_Support_Deprecated_In_MFC': MBCS support in MFC is deprecated and may be removed in a future version of MFC.
+  D:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\afx.h(33): note: 参见“MBCS_Support_Deprecated_In_MFC”的声明
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2143: 语法错误: 缺少“;”(在“*”的前面)
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int
+d:\浙大- -\db\minisql共享资料\minisql_samples\minisql程序\code\MiniSQL.h(49): error C2238: 意外的标记位于“;”之前
+API_Module.cpp(3): fatal error C1083: 无法打开包括文件: “Record_Manager.h”: No such file or directory
+  正在生成代码...

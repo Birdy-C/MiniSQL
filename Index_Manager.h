@@ -14,6 +14,7 @@
 
 //1．查找一个值等于inform.value(inform为info结构体)的记录在table表中的记录号：
 int search_one(CString database, CString table_name, struct index_info & inform);
+
 //2．查找一批>, >= , <, <= inform.value(inform为info结构体)的记录在table表中的记录号：
 void search_many(CString database, CString table_name, int& start, int& end, int type,
 		struct index_info& inform);
@@ -33,11 +34,11 @@ int find_prev_leaf_sibling(CString database, CString table_name, struct index_in
 int find_next_leaf_sibling(CString database, CString table_name, struct index_info inform,
 	int nodenum);
 
-//7．找出最左叶子块的块号：
-int find_left_child(CString database, index_info  inform);
+//7．找出最左叶子块的块号： add  CString table_name
+int find_left_child(CString database, CString table_name, index_info  inform);
 
-//8．找出最右叶子块的块号：
-int find_right_child(CString database, index_info  inform);
+//8．找出最右叶子块的块号： add  CString table_name
+int find_right_child(CString database, CString table_name, index_info  inform);
 
 //9．获取一个空块的块号，并使总块数增一
 int get_new_freeblocknum(CString database, CString table_name, struct index_info& inform);
