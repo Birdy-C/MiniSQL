@@ -50,4 +50,10 @@ int find_father(CString database, CString table_name, index_info inform, int num
 void delete_one(CString database, CString table_name,
 	struct index_info & inform);
 
+//12.
+int find_pos(CString value, CString des, int type_size);
+
+//13.
+int find_insert(CString value, CString des, int type_size);
+
 #endif

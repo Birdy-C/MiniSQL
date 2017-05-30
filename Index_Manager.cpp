@@ -32,19 +32,10 @@ int search_one(CString database, CString table_name, struct index_info &inform)
 {
 
 	inform.offset = 0;
-	fileInfo * ptrDatabase;
-
-	//pre handle
-	ptrDatabase = get_file_info(database, table_name, int(inform.type));// check if the type is right^
-																		// 索引文件为空
-	// check if 表中无记录
-	if (NULL == ptrDatabase) 
-	{
-		return -8;
-	}
-
 	int type_kind = inform.type;
 	int type_size = inform.length;
+	CString des_value = inform.value;
+	blockInfo *Block_temp = get_file_block(database, table_name, type_kind, 0);
 
 	//check if 所查值的类型错误（int，float，char(n)）
 	if (type_kind > 2 || type_kind < 0)
@@ -54,21 +45,18 @@ int search_one(CString database, CString table_name, struct index_info &inform)
 	else if (type_kind == 0 && type_size != 5)
 	{
 		type_size = 5;
-		cout << "type int should have length of 5 bit"<<endl;
+		cout << "search_one::type int should have length of 5 bit" << endl;
 	}
 	else if (type_kind == 1 && type_size != 10)
 	{
 		type_size = 10;
-		cout << "type int should have length of 10 bit" << endl;
+		cout << "search_one::type int should have length of 10 bit" << endl;
 	}
 
-	CString des_value = inform.value;
-	blockInfo *Block_temp = ptrDatabase->firstBlock;
 
-	//索引文件为空
 	if (NULL == Block_temp)
 	{
-		return -8;
+		return -7;
 	}
 
 	CString node_value = Block_temp->cBlock;
@@ -77,64 +65,28 @@ int search_one(CString database, CString table_name, struct index_info &inform)
 	{
 		if ('!' == node_value.GetAt(0))			// leaf node
 		{
-			int num = _ttoi(node_value.Mid(1, 4));//the whole number of record
-
-			int left, right, middle;
-			left = 0;
-			right = num - 1;
-			//the following loop is a Binary Search
-			while (left <= right)
+			int pos = find_pos(node_value, des_value, type_size);
+			if (pos >= 0) 			
 			{
-				middle = (left + right) / 2;
-				if (node_value.Mid(10 + (5 + type_size)* middle, type_size) > des_value)
+				inform.offset = _ttoi(node_value.Mid(5 + (5 + type_size)* pos, 5));//find the value
+				if (0 == inform.offset)
 				{
-					right = middle - 1;
-				}
-				else if (node_value.Mid(10 + (5 + type_size)* middle, type_size) < des_value)
-				{
-					left = middle + 1;
-				}
-				else
-				{
-					inform.offset = _ttoi(node_value.Mid(5 + (5 + type_size)* middle, 5));//find the value
-					return Block_temp->blockNum;
+					cout << "索引文件为空" << endl;
 				}
 			}
-
 			return Block_temp->blockNum;
 		}
 		else if ('?' == node_value.GetAt(0))			// normal node
 		{
-			int num = _ttoi(node_value.Mid(1, 4));     //the whole number of node
-			int left, right, middle;
-			left = 0;
-			right = num;
-			//the following loop is a Binary Search
-			while (left < right)
-			{
-				middle = (left + right) / 2;
-				if (node_value.Mid(8 + (3 + type_size)* middle, type_size) > des_value)
-				{
-					right = middle;
-				}
-				else if (node_value.Mid(8 + (3+ type_size)* middle, type_size) < des_value)
-				{
-					left = middle + 1;
-				}
-				else 
-				{
-					left = right = middle;
-					break;
-				}
-			}
-
+			int pos = find_pos(node_value, des_value, type_size);
 			blockInfo *ptr_temp = get_file_block(database, table_name, type_kind,
-				_ttoi(node_value.Mid(5 + (3 + type_size)* left, 3)));
+				_ttoi(node_value.Mid(5 + (3 + type_size)* pos, 3)));
 			node_value = ptr_temp->cBlock;
 		}	
 		else
 		{
 			// 读到异常块
+			cout << "search_one::read abnormal block" << endl;
 			return -3;
 		}
 	}
@@ -212,32 +164,33 @@ void insert_one(CString database, CString table_name, struct index_info & inform
 	CString des_value = inform.value;
 	blockInfo *pleaf = get_file_block(database, table_name, inform.length, leaf_node);//the leaf node that insert into
 	CString value = pleaf->cBlock;
-	int num = _ttoi(value.Mid(1, 4));//the whole number of record
-	int left, right, middle;
-	left = 0;
-	right = num;
-	//the following loop is a Binary Search
-	while (left < right)
+
+	int pos = find_insert(value, des_value, type_size);
+
+	if (pos == 0)
+		return;
+	if (pos < 0)
 	{
-		middle = (left + right) / 2;
-		if (value.Mid(10 + (5 + type_size)* middle, type_size) > des_value)
+		pos = -pos - 1;
+		int m = 5 + (5 + type_size)*pos;
+		value.Mid(m, 5);
+		if ("00000" == value.Mid(m, 5))
 		{
-			right = middle;
-		}
-		else if (value.Mid(10 + (5 + type_size)* middle, type_size) < des_value)
-		{
-			left = middle + 1;
+			value.Delete(m, 5);
+			value.Insert(m, 5);
 		}
 		else
 		{
-			cout << "insert_one::input already exit in the table" << endl;
-			return;
+			cout << "insert_one::already exit in the file" << endl;
 		}
+		return;
 	}
+	pos--;
 	CString record = int_to_str(inform.offset) + des_value;
-	value.Insert(5 + (5 + type_size)* left, record);
+	value.Insert(5 + (5 + type_size)* pos, record);
 
 	//change the total number of record
+	int num = _ttoi(value.Mid(1, 4));//the whole number of record
 	num++;
 
 	if (num < 1000)
@@ -314,28 +267,8 @@ void insert_divide(CString database, CString table_name, struct index_info& info
 		if ('?' == value.GetAt(0))													// normal node
 		{
 			int num = _ttoi(value.Mid(1, 4));										//the whole number of node
-			int left, right, middle;
-			left = 0;
-			right = num;
-
-			//the following loop is a Binary Search
-			while (left < right)
-			{
-				middle = (left + right) / 2;
-				if (value.Mid(10 + (3 + type_size)* middle, type_size) > temp)
-				{
-					right = middle;
-				}
-				else if (value.Mid(10 + (3 + type_size)* middle, type_size) < temp)
-				{
-					left = middle + 1;
-				}
-				else
-				{
-					std::cout << " The number already exist in the table" << endl;
-					return;
-				}
-			}
+			
+			int pos = find_pos(value, temp, type_size);
 
 			num++;
 			if (num < 10000)			// if the node is not full
@@ -344,8 +277,8 @@ void insert_divide(CString database, CString table_name, struct index_info& info
 				value.Delete(1, 4);
 				value.Insert(1, num2);
 
-				value.Insert(10 + (3 + type_size)* left, temp);
-				value.Insert(10 + (3 + type_size)* left, int_to_str(block2).Right(3));
+				value.Insert(10 + (3 + type_size)* pos, temp);
+				value.Insert(10 + (3 + type_size)* pos, int_to_str(block2).Right(3));
 
 				ptr_temp->cBlock = (LPTSTR)(LPCTSTR)value;
 				return;
@@ -479,11 +412,9 @@ inform：info结构体，不是引用，
 */
 int find_left_child(CString database,CString table_name, index_info  inform)
 {
-	fileInfo * ptrDatabase;
-	ptrDatabase = get_file_info(database, table_name, int(inform.type));// check if the type is right^
 	int type_kind = inform.type;
 	int type_size = inform.length;
-	blockInfo *Block_temp = ptrDatabase->firstBlock;
+	blockInfo *Block_temp = get_file_block(database, table_name, type_kind, 0);
 	CString node_value = Block_temp->cBlock;
 
 	while (1)
@@ -528,11 +459,9 @@ inform：info结构体，不是引用，
 
 int find_right_child(CString database, CString table_name, index_info  inform)
 {
-	fileInfo * ptrDatabase;
-	ptrDatabase = get_file_info(database, table_name, int(inform.type));// check if the type is right^
 	int type_kind = inform.type;
 	int type_size = inform.length;
-	blockInfo *Block_temp = ptrDatabase->firstBlock;
+	blockInfo *Block_temp = get_file_block(database, table_name, type_kind, 0);
 	CString node_value = Block_temp->cBlock;
 
 	while (1)
@@ -625,22 +554,10 @@ num的数据块，则返回他的父亲节点
 int find_father(CString database, CString table_name, index_info inform, int num) 
 {	
 	inform.offset = 0;
-	fileInfo *ptrDatabase;
-
-	//pre handle
-	ptrDatabase = get_file_info(database, table_name, int(inform.type));// check if the type is right^
-																	 // 索引文件为空
-																	 // check if 表中无记录
-	if (NULL == ptrDatabase)
-	{
-		return -8;
-	}
-
 	int type_kind = inform.type;
 	int type_size = inform.length;
-
 	CString des_value = inform.value;
-	blockInfo *Block_temp = ptrDatabase->firstBlock;
+	blockInfo *Block_temp = get_file_block(database, table_name, type_kind, 0);
 
 	//索引文件为空
 	if (NULL == Block_temp)
@@ -659,69 +576,28 @@ int find_father(CString database, CString table_name, index_info inform, int num
 			block_num = Block_temp->blockNum;
 
 
-		if ('!' == node_value.GetAt(0))			// leaf node
+		if ('!' == node_value.GetAt(0))						// leaf node
 		{
-			int whole = _ttoi(node_value.Mid(1, 4));//the whole number of record
-
-			int left, right, middle;
-			left = 0;
-			right = whole - 1;
-			//the following loop is a Binary Search
-			while (left <= right)
+			int pos = find_pos(node_value, des_value, type_size);
+			if (pos < 0)
+				return -1;
+			else
 			{
-				middle = (left + right) / 2;
-				if (node_value.Mid(10 + (5 + type_size)* middle, type_size) > des_value)
-				{
-					right = middle - 1;
-				}
-				else if (node_value.Mid(10 + (5 + type_size)* middle, type_size) < des_value)
-				{
-					left = middle + 1;
-				}
-				else
-				{
-					inform.offset = _ttoi(node_value.Mid(5 + (5 + type_size)* middle, 5));//find the value
-					return Block_temp->blockNum;
-				}
+				return 0;
 			}
-
-			return 0;
 		}
-		else if ('?' == node_value.GetAt(0))			// normal node
+		else if ('?' == node_value.GetAt(0))				// normal node
 		{
 
-			int whole = _ttoi(node_value.Mid(1, 4));     //the whole number of node
-			int left, right, middle;
-			left = 0;
-			right = whole;
-			//the following loop is a Binary Search
-			while (left < right - 1)
-			{
-				middle = (left + right) / 2;
-				if (node_value.Mid(8 + (3 + type_size)* middle, type_size) > des_value)
-				{
-					right = middle + 1;
-				}
-				else if (node_value.Mid(8 + (3 + type_size)* middle, type_size) < des_value)
-				{
-					left = middle;
-				}
-				else
-				{
-					left = middle;
-					right = middle + 1;
-					break;
-				}
-			}
-
+			int pos = find_pos(node_value, des_value, type_size);
 			blockInfo *ptr_temp = get_file_block(database, table_name, type_kind,
-				_ttoi(node_value.Mid(5 + (3 + type_size)* left, 3)));
+				_ttoi(node_value.Mid(5 + (3 + type_size)* pos, 3)));
 			node_value = ptr_temp->cBlock;
 		}
 		else
 		{
 			// 读到异常块
-			cout << "find_father :: read unsual block" << endl;
+			cout << "find_father :: read abnormal block" << endl;
 			return -1;
 		}
 	}
@@ -739,6 +615,10 @@ void delete_one(CString database, CString table_name,
 	fileInfo * ptrDatabase;
 	ptrDatabase = get_file_info(database, table_name, int(inform.type));
 	int Block_num = search_one(database, table_name, inform);
+	if (inform.offset <= 0)
+	{
+		cout << "delete_one::删除的数据不存在表中" << endl;
+	}
 	blockInfo *Block = get_file_block(database, table_name, inform.length, Block_num);
 	CString m;
 	m = int_to_str(ptrDatabase->freeNum);
@@ -746,4 +626,117 @@ void delete_one(CString database, CString table_name,
 	Block->cBlock = (LPTSTR)(LPCTSTR)m;					// From CString to char *
 	ptrDatabase->freeNum = Block_num;
 
+}
+
+/*
+12.
+插入
+查找 返回位置
+不存在返回-1
+*/
+int find_pos(CString value, CString des_value, int type_size)
+{
+
+	CString node_value = value;
+	int num = _ttoi(node_value.Mid(1, 4));						//the whole number of record
+
+	if ('!' == node_value.GetAt(0))							// leaf node
+	{
+		int left, right, middle;
+		left = 0;
+		right = num - 1;
+		//the following loop is a Binary Search
+		while (left <= right)
+		{
+			middle = (left + right) / 2;
+			if (node_value.Mid(10 + (5 + type_size)* middle, type_size) > des_value)
+			{
+				right = middle - 1;
+			}
+			else if (node_value.Mid(10 + (5 + type_size)* middle, type_size) < des_value)
+			{
+				left = middle + 1;
+			}
+			else
+			{
+				return middle;
+			}
+		}
+		return -1;
+	}
+	else if ('?' == node_value.GetAt(0))			// normal node
+	{
+		int left, right, middle;
+		left = 0;
+		right = num;
+		//the following loop is a Binary Search
+		while (left < right)
+		{
+			middle = (left + right) / 2;
+			if (node_value.Mid(8 + (3 + type_size)* middle, type_size) > des_value)
+			{
+				right = middle;
+			}
+			else if (node_value.Mid(8 + (3 + type_size)* middle, type_size) < des_value)
+			{
+				left = middle + 1;
+			}
+			else
+			{
+				left = right = middle + 1;
+				break;
+			}
+		}
+
+		return left;
+	}
+	else
+	{
+		cout << " find_pos::读到异常块 " << endl;
+		return -3;
+
+	}
+}
+
+/*
+13.
+返回插入位置 所在区间 1~n
+异常返回 0
+对于叶子 如果已经存在表中存在 -pos -1
+*/
+
+int find_insert(CString value, CString des_value, int type_size)
+{
+	CString node_value = value;
+
+	int num = _ttoi(node_value.Mid(1, 4));//the whole number of record
+	int left, right, middle;
+	if ('!' == node_value.GetAt(0))							// leaf node
+	{
+		left = 0;
+		right = num;
+		//the following loop is a Binary Search
+		while (left < right)
+		{
+			middle = (left + right) / 2;
+			if (node_value.Mid(10 + (5 + type_size)* middle, type_size) > des_value)
+			{
+				right = middle;
+			}
+			else if (value.Mid(10 + (5 + type_size)* middle, type_size) < des_value)
+			{
+				left = middle + 1;
+			}
+			else
+			{
+				cout << "insert_one::input already exit in the table" << endl;
+				return - middle - 1;
+			}
+		}
+	}
+	else
+	{
+		cout << " find_pos::读到异常块 " << endl;
+		return 0;
+	}
 }
