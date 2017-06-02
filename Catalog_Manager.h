@@ -8,8 +8,8 @@
 void Create_Database(CString DB_Name);
 
 //创建表
-void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & Attr_Name);
-
+void Create_Table(CString Table_Name, CString Attr, CString DB_Name);
+/*
 //创建索引
 void Create_Index(CString Index_Name, CString Table_Name, CString Attr_Name, CString DB_Name, int & length, int & offset, int & type);
 
@@ -18,10 +18,10 @@ CString add_info(CString info, int length, CString attr);
 
 //验证属性组名是否有效
 bool verify_attrs(CString attrs[32], int count);
-
+*/
 //删除数据库
 void Drop_Database(CString DB_Name);
-
+/*
 //删除表
 void Drop_Table(CString Table_Name, CString DB_Name, CString index_name[32], int & count);
 
@@ -57,5 +57,5 @@ CString Use_Database(CString DB_Name);
 
 //执行指定文件
 void Exect_File(CString File);
-
+*/
 #endif // !CATALOG_MANAGER_H
