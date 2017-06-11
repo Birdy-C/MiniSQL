@@ -16,16 +16,16 @@ void Create_Database(CString DB_Name)
 		if (flag) {
 			if (CreateDirectory(fpath + "\\catalog", NULL) && CreateDirectory(fpath + "\\table", NULL) && CreateDirectory(fpath + "\\index", NULL)) 
 			{
-				if (CreateDirectory(fpath + "\\catalog\\table_num", NULL) && CreateDirectory(fpath + "\\catalog\\table_attr", NULL) && CreateDirectory(fpath + "\\catalog\\table_info", NULL) && CreateDirectory(fpath + "\\catalog\\index_info", NULL))
+				if (CreateDirectory(fpath + "\\catalog\\table_num", NULL) && CreateDirectory(fpath + "\\catalog\\table_info", NULL) && CreateDirectory(fpath + "\\catalog\\index_info", NULL))
 				{
 					ofstream table_num;//创建table_num文件
 					table_num.open(fpath + "\\catalog\\table_num\\table_num.txt");
 					table_num << 0;//初始表数为0
 					table_num.close();
 
-					ofstream table_attr;
+					/*ofstream table_attr;
 					table_attr.open(fpath + "\\catalog\\table_attr\\table_attr.txt");
-					table_attr.close();
+					table_attr.close();*/
 					cout << "create database successfully!" << endl;
 				}
 				else
@@ -129,7 +129,7 @@ void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & A
 				e->Delete();
 			}
 			//修改table_attr.txt内容
-			CFile table_attr;
+		/*	CFile table_attr;
 			CString attr_path = "..\\" + DB_Name + "\\catalog\\table_attr\\table_attr.txt";
 			table_attr.Open(attr_path, CFile::modeWrite);
 			table_attr.SeekToEnd();
@@ -142,7 +142,7 @@ void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & A
 			table_attr.Write(line.GetBuffer(), line.GetLength());//换行
 
 			table_attr.Close();
-
+*/
 			cout << "create table successfully!" << endl;
 		}
 		else
@@ -572,25 +572,6 @@ bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condi
 				one_cond = Condition.Mid(start, end - start);//获取单独的一个condition
 				start = end + 1;
 				Get_each_condition(one_cond, conds, count);
-				/*
-				op_end = one_cond.ReverseFind(' ');
-				op_start = op_end - 2;
-				op = one_cond.Mid(op_start, 2);
-				//结构体里的Condition也是运算符的意思……？那传入参数的那个cond是啥呢呢呢呢呢
-				//先把它们都存成运算符好了
-				//不对，要先判断属性名对不对
-				//癌，先把所有信息都提取出来，然后再想下一步怎么办吧
-				temp_attr = one_cond.Left(op_start);//提取属性名
-
-				right_type = one_cond.GetAt(op_end+1);//获取右侧值的数据类型
-				right_value = one_cond.Right(one_cond.GetLength() - op_end-2);//获取右侧值
-				//wcout << temp_attr.GetString() << " " << op.GetString() << " " << right_type.GetString() << " " << right_value.GetString() << endl;//测试提取是否成功用
-				conds[count].left_attr = temp_attr;//先把这些信息都存起来，对不对再说……
-				conds[count].condition = op;
-				conds[count].const_data = right_value;
-				conds[count].right_type = right_type;
-				count++;
-				*/
 			}
 			//然后要获取最后一个属性的信息
 			end = Condition.GetLength() - 1;//要忽略掉最后那个. 干嘛要在最后加个点呢，啧……
@@ -606,7 +587,7 @@ bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condi
 			
 			int i,j;
 			int flag;
-			CString index_name;
+	
 			for (i = 0; i < count; i++)//遍历conds,逐个验证……
 			{
 				flag = 0;
@@ -622,6 +603,7 @@ bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condi
 						{
 							//验证成功了
 							//接下来是不是应该完善一下conds,看看那些属性有没有索引什么的
+							conds[i].left_index_name = attrs[j].index_name;
 							//先空着
 							//cout << "验证成功了" << endl;
 							flag = 2;
@@ -666,6 +648,71 @@ bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condi
 		e->Delete();
 	}
 }
+
+
+//验证insert语句是否正确
+//先看表名
+//再验证：1.属性个数是否一致 2.各个属性的类型是否一致
+bool verify_insert(CString DB_Name, CString Table_Name, CString Attr)
+{
+	CString table_info_path = "..\\" + DB_Name + "\\catalog\\table_info\\" + Table_Name + ".txt";
+	CStdioFile table_info;
+	try
+	{
+		if (table_info.Open(table_info_path, CFile::modeRead))//有这张表
+		{
+			table_info.Close();
+			attr_info print[32];
+			int table_count;
+			Get_Attr_Info_All(DB_Name, Table_Name, print, table_count);//先获取catalog中表属性的信息
+			//然后读取输入信息，逐个比较
+			CString temp;
+			CString input_type;
+			int input_count = 0;
+			//int flag = 0;
+			int start = 0, end;
+			int length = Attr.GetLength();
+			while ((start != length)&&((end = Attr.Find(',', start)) != -1))//逗号为分界
+			{
+			
+				temp = Attr.Mid(start, end - start);
+				input_type = temp.GetAt(1);//获取输入的数据类型
+
+				if (input_type != print[input_count].type)//数据类型不一致 //不知道能不能这么比较
+				{
+					wcout << "The input data doesn't match the type of attribute " << print[input_count].attr_name.GetString() << " !" << endl;
+					return false;
+					//break;
+				}
+
+
+				start = end + 1;
+				input_count++;
+			}
+			if (input_count != table_count)
+			{
+				cout << "The number of input data doesn't match!" << endl;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+
+		}
+		else//没有这个表
+		{
+			wcout << "No such a table named " << Table_Name.GetString() << endl;
+			return false;
+		}
+	}
+	catch (CException* e)
+	{
+		e->ReportError();
+		e->Delete();
+	}
+}
+
 /*
 //获取显示记录格式
 void Get_Attr_Info(CString DB_Name, CString Table_Name, attr_info print[32], int & count, CString Attr)
@@ -685,8 +732,8 @@ void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32],
 		if (table_info.Open(table_info_path, CFile::modeRead))//有这张表
 		{
 			CString strLine;
-			CString temp_type;
-			int attr_end,type_end;
+			CString temp_type,temp_index_name;
+			int attr_end,type_end,index_end;
 			int length = 0;
 			count = 0;
 			while (table_info.ReadString(strLine))
@@ -698,6 +745,10 @@ void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32],
 					type_end = strLine.Find(' ',attr_end+1);
 					temp_type = strLine.Mid(attr_end + 1, type_end - attr_end-1);
 
+					index_end = strLine.ReverseFind(' ');//记录索引名
+					temp_index_name = strLine.Right(strLine.GetLength() - index_end-1);
+					print[count].index_name = temp_index_name;
+					
 					if (temp_type == '+')//属性类型 int:+ float:- char:/
 					{
 						print[count].type = '+';
@@ -711,13 +762,14 @@ void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32],
 						print[count].type = '/';
 					}
 
-					print[count].offset = length;//这样offset是这行记录在table_info文件中的位置，length是它这一行的长度
-					print[count].length = strLine.GetLength();
-					length += strLine.GetLength();//不知道这样对不对，暂时先这样放着
+				//	print[count].offset = length;//这样offset是这行记录在table_info文件中的位置，length是它这一行的长度
+				//	print[count].length = strLine.GetLength();
+				//	length += strLine.GetLength();//不知道这样对不对，暂时先这样放着
 
 					count++;
 				}
 			}
+			table_info.Close();
 		}
 		else//没有这个表
 		{
@@ -739,6 +791,7 @@ void Get_All_Index(CFile & file, long header, int attrs, index_info nodes[32], i
 }
 
 //使用数据库use
+//查找一下有无该数据库就好了……
 CString Use_Database(CString DB_Name)
 {
 

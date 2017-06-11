@@ -8,11 +8,11 @@
 void Create_Database(CString DB_Name);
 
 //创建表
-void Create_Table(CString Table_Name, CString Attr, CString DB_Name);
-/*
+void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & Attr_Name);
+
 //创建索引
 void Create_Index(CString Index_Name, CString Table_Name, CString Attr_Name, CString DB_Name, int & length, int & offset, int & type);
-
+/*
 //向字符串增加信息
 CString add_info(CString info, int length, CString attr);
 
@@ -21,13 +21,13 @@ bool verify_attrs(CString attrs[32], int count);
 */
 //删除数据库
 void Drop_Database(CString DB_Name);
-/*
+
 //删除表
 void Drop_Table(CString Table_Name, CString DB_Name, CString index_name[32], int & count);
 
 //删除索引
 void Drop_Index(CString Index_Name, CString DB_Name);
-
+/*
 //验证并增加属性值
 bool verify_add_attr(CString & attr, CString & temp, int type, int length);
 
@@ -39,16 +39,20 @@ void Verify_Attr(CString DB_Name, CString Table_Name, CString & Attr, index_info
 
 //删除表内所有元组
 void Empty_Table(CString DB_Name, CString Table_Name, CString index_name[32], int & count);
-
+*/
+//获取每一个条件的信息
+void Get_each_condition(CString one_cond, condition_info conds[32], int& count);
 //转换条件组
 bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condition_info conds[32], int & count, char & cond, index_info nodes[32], int & num);
-
+//验证insert语句是否正确
+bool verify_insert(CString DB_Name, CString Table_Name, CString Attr);
+/*
 //获取显示记录格式
 void Get_Attr_Info(CString DB_Name, CString Table_Name, attr_info print[32], int & count, CString Attr);
-
+*/
 //获取所有属性的信息
 void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32], int & count);
-
+/*
 //获取表中所有的索引信息
 void Get_All_Index(CFile & file, long header, int attrs, index_info nodes[32], int & num);
 
