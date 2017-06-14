@@ -46,6 +46,8 @@ void Get_each_condition(CString one_cond, condition_info conds[32], int& count);
 bool Get_Condition(CString DB_Name, CString Table_Name, CString Condition, condition_info conds[32], int & count, char & cond, index_info nodes[32], int & num);
 //验证insert语句是否正确
 bool verify_insert(CString DB_Name, CString Table_Name, CString Attr);
+//在成功插入记录之后更新record数目
+void update_record_info(CString DB_Name, CString Table_Name);
 /*
 //获取显示记录格式
 void Get_Attr_Info(CString DB_Name, CString Table_Name, attr_info print[32], int & count, CString Attr);
@@ -55,11 +57,11 @@ void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32],
 /*
 //获取表中所有的索引信息
 void Get_All_Index(CFile & file, long header, int attrs, index_info nodes[32], int & num);
-
+*/
 //使用数据库
-CString Use_Database(CString DB_Name);
+fileInfo* Use_Database(CString DB_Name);
 
 //执行指定文件
-void Exect_File(CString File);
-*/
+//void Exect_File(CString File);
+
 #endif // !CATALOG_MANAGER_H

@@ -2,7 +2,7 @@
 #include "shlwapi.h"
 #pragma comment(lib,"shlwapi.lib")
 #include<fstream>
-
+#include<vector>
 
 //创建数据库
 //先判断数据库是否已经存在，如果存在返回错误信息
@@ -16,7 +16,7 @@ void Create_Database(CString DB_Name)
 		if (flag) {
 			if (CreateDirectory(fpath + "\\catalog", NULL) && CreateDirectory(fpath + "\\table", NULL) && CreateDirectory(fpath + "\\index", NULL)) 
 			{
-				if (CreateDirectory(fpath + "\\catalog\\table_num", NULL) && CreateDirectory(fpath + "\\catalog\\table_info", NULL) && CreateDirectory(fpath + "\\catalog\\index_info", NULL))
+				if (CreateDirectory(fpath + "\\catalog\\table_num", NULL) && CreateDirectory(fpath + "\\catalog\\table_info", NULL) && CreateDirectory(fpath + "\\catalog\\index_info", NULL) && CreateDirectory(fpath + "\\catalog\\record_info", NULL))
 				{
 					ofstream table_num;//创建table_num文件
 					table_num.open(fpath + "\\catalog\\table_num\\table_num.txt");
@@ -72,10 +72,13 @@ void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & A
 			fpath.Open(file_name, CFile::modeCreate | CFile::modeWrite);
 			//把各个属性名和类型等信息存入catalog的table_info表
 			
-			CString temp;
+			CString temp,temp_type;
 			CString line = "\r\n";
 			int start = 0, end, primary_key_end;
 			int count = 0;//记录属性数
+			int recordLength = 0;//每条记录的长度
+			int type_start, type_end;
+			int temp_length;
 			
 			while ((end = Attr.Find(',', start)) != -1)//找到逗号
 			{
@@ -84,25 +87,35 @@ void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & A
 				temp += " NULL";
 				fpath.Write((unsigned char *)(temp.GetBuffer()),temp.GetLength());//存到table_info表中
 				fpath.Write(line.GetBuffer(), line.GetLength());
+
 				if (temp.Find('#') != -1)//有主键定义
 				{
 					count--;
 					primary_key_end = temp.Find(' ');
 					Attr_Name = temp.Mid(0, primary_key_end);
+					break;//就不要进行属性类型判断了
 				}
+
+				type_start = temp.Find(' ');
+				type_end = temp.Find(' ', type_start + 1);
+				temp_type = temp.Mid(type_start + 1, type_end - type_start-1);//获取属性类型
+				if (temp_type == '+')
+				{
+					recordLength += 4;
+				}
+				else if (temp_type == '-')
+				{
+					recordLength += 8;
+				}
+				else//char的这个怎么加上去呢……
+				{
+					temp_length = _ttoi(temp_type);
+					recordLength += temp_length;
+				}
+				
 				start = end + 1;
 			}
 			fpath.Close();
-			
-			//更新database表
-			/*CString database_file_name = "..\\" + DB_Name + "\\catalog\\database_info.txt";
-			CFile database_info;
-			database_info.Open(database_file_name,CFile::modeReadWrite);
-			int num_table;
-			database_info >> num_table;
-			cout << "current table num: "<<num_table<<endl;
-			//要把database_info文件中的第一行更新
-			num_table++;*/
 
 			try //table_num中表数增加1
 			{
@@ -122,6 +135,24 @@ void Create_Table(CString Table_Name, CString Attr, CString DB_Name, CString & A
 				database_info.SetLength(0);
 				database_info.WriteString(strNewLine);
 				database_info.Close();
+
+				//更新record_info的信息
+				CString record_path = "..\\" + DB_Name + "\\catalog\\record_info\\record_info.txt";
+				CStdioFile record_info;
+				record_info.Open(record_path, CFile::modeCreate | CFile::modeNoTruncate | CFile::modeWrite);
+				//前边在读入数据的时候要计算总长度recordLength
+				CString record_info_line,record_length;
+				record_length.Format("%d", recordLength);
+				record_info_line = Table_Name + " " + record_length + " 0";
+
+				//把record_info_line写到record_info文件末尾一行//癌，为啥总会覆盖之前的数据呢//因为没加modeNoTruncate
+				//int end_offset;
+				//end_offset = record_info.SeekToEnd();
+				record_info.SeekToEnd();
+				record_info.Write(record_info_line.GetBuffer(),record_info_line.GetLength());
+				record_info.Write(line.GetBuffer(), line.GetLength());//换行
+				record_info.Close();
+
 			}
 			catch (CException* e)
 			{
@@ -712,6 +743,58 @@ bool verify_insert(CString DB_Name, CString Table_Name, CString Attr)
 		e->Delete();
 	}
 }
+void update_record_info(CString DB_Name, CString Table_Name)
+{
+	//更新record_info的信息
+	CString record_path = "..\\" + DB_Name + "\\catalog\\record_info\\record_info.txt";
+	CStdioFile record_info;
+	record_info.Open(record_path, CFile::modeNoTruncate | CFile::modeReadWrite);
+	
+	CString strLine(_T(""));
+	CString temp_table_name;
+	vector<CString> newLine;
+	int end;
+	int flag = 0, line_offset = 0;
+	while (record_info.ReadString(strLine))
+	{
+		end = strLine.Find(' ');
+		temp_table_name = strLine.Left(end);
+		if (temp_table_name == Table_Name)//找到插入的表名对应的那行
+		{
+			break;
+		}
+		line_offset += strLine.GetLength();
+		strLine = _T("");
+	}
+
+	CString temp_amount;
+	int amount;
+	end = strLine.ReverseFind(' ');
+	temp_amount = strLine.Right(strLine.GetLength() - end-1);
+	amount = _ttoi(temp_amount);
+	amount++;
+	temp_amount.Format("%d", amount);
+
+	newLine.push_back(strLine.Left(end) + " "+temp_amount);//更新一下strLine,准备写回去
+	int i = 1;
+	while (record_info.ReadString(strLine))
+	{
+		newLine.push_back(strLine);
+	}
+	newLine.push_back("");
+
+	i = 0;//再全写回去
+	record_info.Seek(line_offset, CFile::begin);
+	CString line = "\r\n";
+	while (!newLine[i].IsEmpty())
+	{
+		record_info.Write(newLine[i].GetBuffer(), newLine[i].GetLength());
+		record_info.Write(line.GetBuffer(), line.GetLength());//换行
+		i++;
+	}
+
+	record_info.Close();
+}
 
 /*
 //获取显示记录格式
@@ -767,6 +850,7 @@ void Get_Attr_Info_All(CString DB_Name, CString Table_Name, attr_info print[32],
 				//	length += strLine.GetLength();//不知道这样对不对，暂时先这样放着
 
 					count++;
+					strLine = _T("");
 				}
 			}
 			table_info.Close();
@@ -789,14 +873,76 @@ void Get_All_Index(CFile & file, long header, int attrs, index_info nodes[32], i
 {
 
 }
-
+*/
 //使用数据库use
-//查找一下有无该数据库就好了……
-CString Use_Database(CString DB_Name)
+//先验证数据库是否存在
+//建立fileInfo链表   //前边需要记录每个表的records数
+//先写到这，还没调试过……不知道运不运行得起来
+PtrToFileInfo Use_Database(CString DB_Name)
 {
+	PtrToFileInfo file_head;//它是个类似哨兵之类的链表头
+	PtrToFileInfo temp_pointer;
+	file_head = (PtrToFileInfo)malloc(sizeof(struct fileInfo));
+	file_head->next = NULL;
+	file_head->firstBlock = NULL;
+	temp_pointer = file_head->next;
+	
+	CString record_path = "..\\" + DB_Name + "\\catalog\\record_info\\record_info.txt";
+	CStdioFile record_info;
+	record_info.Open(record_path, CFile::modeNoTruncate | CFile::modeRead);
 
+	CString strLine;
+	CString temp_file_name;
+	CString temp_length,temp_amount;
+	int start = 0, end;
+	while (record_info.ReadString(strLine))//读data文件的信息，串进链表
+	{
+		temp_pointer = (PtrToFileInfo)malloc(sizeof(struct fileInfo));
+		temp_pointer->type = 0;
+
+		end = strLine.Find(' ');
+		temp_file_name = "..\\" + DB_Name + "\\table\\" + strLine.Left(end) + ".txt";
+		temp_pointer->fileName = temp_file_name;
+
+		start = end + 1;
+		end = strLine.Find(' ', start);
+		temp_length = strLine.Mid(start, end - start);
+		temp_pointer->recordLength = _ttoi(temp_length);
+
+		start = end + 1;
+		end = strLine.GetLength();
+		temp_amount = strLine.Mid(start, end - start);
+		temp_pointer->recordAmount = _ttoi(temp_amount);
+
+		temp_pointer->next = NULL;
+		temp_pointer = temp_pointer->next;
+
+		strLine = _T("");
+	}
+
+	//开始记录索引文件的信息
+	CFileFind finder;
+	CString index_path = "..\\" + DB_Name + "\\catalog\\index_info";
+	
+	index_path += _T("\\*.*");
+	bool bWorking = finder.FindFile(index_path);
+	while (bWorking) //不知道recordLength和recordAmount是干啥的……
+	{
+		temp_pointer = (PtrToFileInfo)malloc(sizeof(struct fileInfo));
+		temp_pointer->type = 1;
+		
+		temp_file_name = "..\\" + DB_Name + "\\index\\"+finder.GetFileName();
+
+		temp_pointer->next = NULL;
+		temp_pointer = temp_pointer->next;
+
+		bWorking = finder.FindNextFile();
+	}
+
+	return file_head;
+	
 }
-
+/*
 //执行指定文件execfile
 void Exect_File(CString File)
 {

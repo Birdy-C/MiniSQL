@@ -68,6 +68,7 @@ struct fileInfo
 	fileInfo *next;				// the pointer points to the next file
 	blockInfo *firstBlock;		// point to the first block within the file
 };
+typedef struct fileInfo* PtrToFileInfo;
 
 //定义表的索引节点信息
 struct index_info
