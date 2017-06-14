@@ -6,7 +6,8 @@
 #include<stdlib.h>
 #include<math.h>
 #include<direct.h>
-
+#include"Interpreter.h"
+using namespace std;
 #define FILE_COUNTER 1
 #define FILE_INFO_LENGTH 671
 #define ATTR_INFO_LENGTH 20
@@ -14,31 +15,34 @@
 
 
 
-//定义delete 语句的条件信息
+//定义where语句的条件信息
 struct condition_info
 {
 	char left_type;
 	int left_len;
 	long left_offset;
+	CString left_attr;//为啥没有这个呢……
 	CString left_index_name;
-	char right_type;
+	CString right_type;
 	int right_len;
 	long right_offset;
 	CString right_index_name;
 	CString const_data;
 	CString condition;
-};	
+};
 
 //定义select 语句显示各属性信息
 struct attr_info
 {
 	CString attr_name;
+	CString index_name;
 	int offset;
 	int length;
 	char type;
 };
+typedef struct attr_info* PtrToAttrInfo;
 
-
+struct fileInfo;
 // 所读取块的信息
 struct blockInfo
 {
@@ -64,6 +68,7 @@ struct fileInfo
 	fileInfo *next;				// the pointer points to the next file
 	blockInfo *firstBlock;		// point to the first block within the file
 };
+typedef struct fileInfo* PtrToFileInfo;
 
 //定义表的索引节点信息
 struct index_info
